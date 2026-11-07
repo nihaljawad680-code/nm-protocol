@@ -3,8 +3,9 @@ import json
 import sqlite3
 import hashlib
 import secrets
+import os
 
-PORT = 8080
+PORT = int(os.environ.get("PORT", 8080))
 DB_FILE = "nm_protocol.db"
 
 def init_db():
@@ -17,7 +18,6 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS transactions 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, sender TEXT, receiver TEXT, amount REAL, fee REAL, type TEXT)''')
     
-    # আপনার বরাদ্দ ১,৫০১,০০০ NM এবং মাইনিং পুল ৫০০,০০০ NM
     c.execute("SELECT * FROM accounts WHERE username='Nizam'")
     if not c.fetchone():
         priv = secrets.token_hex(32)
@@ -103,7 +103,7 @@ class TokenHandler(http.server.SimpleHTTPRequestHandler):
                 conn.close()
                 return
             
-            earned_points = 3.0  # দৈনিক বা সেশনের জন্য নির্ধারিত ৩ পয়েন্ট
+            earned_points = 3.0 
             c.execute("UPDATE accounts SET points = points + ? WHERE username=?", (earned_points, username))
             conn.commit()
             conn.close()
@@ -127,8 +127,8 @@ class TokenHandler(http.server.SimpleHTTPRequestHandler):
                 return
             
             user_points = row[0]
-            conversion_rate = 10000.0  # ১০,০০০ পয়েন্ট = ১ NM
-            tokens_to_claim = user_points // conversion_rate  # পূর্ণাঙ্গ টোকেন হিসাব
+            conversion_rate = 10000.0 
+            tokens_to_claim = user_points // conversion_rate 
             points_deducted = tokens_to_claim * conversion_rate
 
             if tokens_to_claim <= 0:
@@ -245,7 +245,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         async function claimTokens() {
-            let username = document.getElementById('minerName').value;
+            let username = document.getElementById('minerName5').value || document.getElementById('minerName').value;
             if(!username) return alert("Enter your username first!");
             let res = await fetch('/api/claim-tokens', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username})});
             let d = await res.json();
@@ -259,7 +259,10 @@ HTML_CONTENT = """<!DOCTYPE html>
 </html>
 """
 
+# Gunicorn ডেমোন বা WSGI সার্ভারের জন্য app অবজেক্ট তৈরি করা হলো
+app = TokenHandler
+
 if __name__ == "__main__":
-    server = http.server.HTTPServer(("127.0.0.1", PORT), TokenHandler)
-    print(f"Mining Server running at http://127.0.0.1:{PORT}")
+    server = http.server.HTTPServer(("0.0.0.0", PORT), TokenHandler)
+    print(f"Mining Server running at http://0.0.0.0:{PORT}")
     server.serve_forever()
