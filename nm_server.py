@@ -1,11 +1,10 @@
-import http.server
-import json
+import os
 import sqlite3
 import hashlib
 import secrets
-import os
+from flask import Flask, render_template_string, request, jsonify
 
-PORT = int(os.environ.get("PORT", 8080))
+app = Flask(__name__)
 DB_FILE = "nm_protocol.db"
 
 def init_db():
@@ -33,140 +32,94 @@ def init_db():
 
 init_db()
 
-class TokenHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        if self.path in ["/api/data", "/index.html", "/"]:
-            if self.path in ["/", "/index.html"]:
-                self.send_response(200)
-                self.send_header("Content-type", "text/html; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(HTML_CONTENT.encode("utf-8"))
-                return
-            
-            conn = sqlite3.connect(DB_FILE)
-            c = conn.cursor()
-            c.execute("SELECT username, balance, points, pub_address FROM accounts")
-            accounts = {row[0]: {"balance": row[1], "points": row[2], "address": row[3]} for row in c.fetchall()}
-            
-            c.execute("SELECT key, value FROM stats")
-            stats = {row[0]: row[1] for row in c.fetchall()}
-            
-            c.execute("SELECT sender, receiver, amount, fee, type FROM transactions ORDER BY id DESC LIMIT 20")
-            txs = [{"sender": row[0], "receiver": row[1], "amount": row[2], "fee": row[3], "type": row[4]} for row in c.fetchall()]
-            conn.close()
+@app.route("/")
+def index():
+    return render_template_string(HTML_CONTENT)
 
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"balances": accounts, "stats": stats, "transactions": txs}).encode("utf-8"))
-        else:
-            return super().do_GET()
+@app.route("/api/data", methods=["GET"])
+def get_data():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT username, balance, points, pub_address FROM accounts")
+    accounts = {row[0]: {"balance": row[1], "points": row[2], "address": row[3]} for row in c.fetchall()}
+    
+    c.execute("SELECT key, value FROM stats")
+    stats = {row[0]: row[1] for row in c.fetchall()}
+    
+    c.execute("SELECT sender, receiver, amount, fee, type FROM transactions ORDER BY id DESC LIMIT 20")
+    txs = [{"sender": row[0], "receiver": row[1], "amount": row[2], "fee": row[3], "type": row[4]} for row in c.fetchall()]
+    conn.close()
+    return jsonify({"balances": accounts, "stats": stats, "transactions": txs})
 
-    def do_POST(self):
-        content_length = int(self.headers.get('Content-Length', 0))
-        post_data = self.rfile.read(content_length)
-        req = json.loads(post_data.decode("utf-8"))
-        conn = sqlite3.connect(DB_FILE)
-        c = conn.cursor()
-
-        if self.path == "/api/create-wallet":
-            username = req.get("username")
-            c.execute("SELECT * FROM accounts WHERE username=?", (username,))
-            if c.fetchone():
-                self.send_response(400)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": "Username taken!"}).encode("utf-8"))
-                conn.close()
-                return
-            
-            priv = secrets.token_hex(32)
-            pub = "0x" + hashlib.sha256(priv.encode()).hexdigest()[:40]
-            c.execute("INSERT INTO accounts VALUES (?, 0, 0, ?, ?)", (username, pub, priv))
-            conn.commit()
-            conn.close()
-
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"success": True, "address": pub, "private_key": priv}).encode("utf-8"))
-            return
-
-        elif self.path == "/api/mine-points":
-            username = req.get("username")
-            c.execute("SELECT * FROM accounts WHERE username=?", (username,))
-            if not c.fetchone():
-                self.send_response(400)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": "User not found!"}).encode("utf-8"))
-                conn.close()
-                return
-            
-            earned_points = 3.0 
-            c.execute("UPDATE accounts SET points = points + ? WHERE username=?", (earned_points, username))
-            conn.commit()
-            conn.close()
-
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"success": True, "points": earned_points}).encode("utf-8"))
-            return
-
-        elif self.path == "/api/claim-tokens":
-            username = req.get("username")
-            c.execute("SELECT points FROM accounts WHERE username=?", (username,))
-            row = c.fetchone()
-            if not row or row[0] < 10000:
-                self.send_response(400)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": "Minimum 10,000 points required to claim 1 NM!"}).encode("utf-8"))
-                conn.close()
-                return
-            
-            user_points = row[0]
-            conversion_rate = 10000.0 
-            tokens_to_claim = user_points // conversion_rate 
-            points_deducted = tokens_to_claim * conversion_rate
-
-            if tokens_to_claim <= 0:
-                self.send_response(400)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": "Not enough points for 1 NM!"}).encode("utf-8"))
-                conn.close()
-                return
-
-            c.execute("SELECT balance FROM accounts WHERE username='MiningPool'")
-            pool_row = c.fetchone()
-            if not pool_row or pool_row[0] < tokens_to_claim:
-                self.send_response(400)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": "Mining pool exhausted!"}).encode("utf-8"))
-                conn.close()
-                return
-
-            c.execute("UPDATE accounts SET balance = balance - ? WHERE username='MiningPool'", (tokens_to_claim,))
-            c.execute("UPDATE accounts SET balance = balance + ?, points = points - ? WHERE username=?", (tokens_to_claim, points_deducted, username))
-            c.execute("UPDATE stats SET value = value + 1 WHERE key='total_txs'")
-            c.execute("INSERT INTO transactions (sender, receiver, amount, fee, type) VALUES ('MiningPool', ?, ?, 0, 'Point Claim')", (username, tokens_to_claim))
-            conn.commit()
-            conn.close()
-
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"success": True, "claimed": tokens_to_claim}).encode("utf-8"))
-            return
-
+@app.route("/api/create-wallet", methods=["POST"])
+def create_wallet():
+    req = request.json
+    username = req.get("username")
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT * FROM accounts WHERE username=?", (username,))
+    if c.fetchone():
         conn.close()
-        self.send_response(200)
-        self.send_header("Content-type", "application/json")
-        self.end_headers()
-        self.wfile.write(json.dumps({"success": True}).encode("utf-8"))
+        return jsonify({"error": "Username taken!"}), 400
+    
+    priv = secrets.token_hex(32)
+    pub = "0x" + hashlib.sha256(priv.encode()).hexdigest()[:40]
+    c.execute("INSERT INTO accounts VALUES (?, 0, 0, ?, ?)", (username, pub, priv))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "address": pub, "private_key": priv})
+
+@app.route("/api/mine-points", methods=["POST"])
+def mine_points():
+    req = request.json
+    username = req.get("username")
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT * FROM accounts WHERE username=?", (username,))
+    if not c.fetchone():
+        conn.close()
+        return jsonify({"error": "User not found!"}), 400
+    
+    earned_points = 3.0 
+    c.execute("UPDATE accounts SET points = points + ? WHERE username=?", (earned_points, username))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "points": earned_points})
+
+@app.route("/api/claim-tokens", methods=["POST"])
+def claim_tokens():
+    req = request.json
+    username = req.get("username")
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT points FROM accounts WHERE username=?", (username,))
+    row = c.fetchone()
+    if not row or row[0] < 10000:
+        conn.close()
+        return jsonify({"error": "Minimum 10,000 points required to claim 1 NM!"}), 400
+    
+    user_points = row[0]
+    conversion_rate = 10000.0 
+    tokens_to_claim = user_points // conversion_rate 
+    points_deducted = tokens_to_claim * conversion_rate
+
+    if tokens_to_claim <= 0:
+        conn.close()
+        return jsonify({"error": "Not enough points for 1 NM!"}), 400
+
+    c.execute("SELECT balance FROM accounts WHERE username='MiningPool'")
+    pool_row = c.fetchone()
+    if not pool_row or pool_row[0] < tokens_to_claim:
+        conn.close()
+        return jsonify({"error": "Mining pool exhausted!"}), 400
+
+    c.execute("UPDATE accounts SET balance = balance - ? WHERE username='MiningPool'", (tokens_to_claim,))
+    c.execute("UPDATE accounts SET balance = balance + ?, points = points - ? WHERE username=?", (tokens_to_claim, points_deducted, username))
+    c.execute("UPDATE stats SET value = value + 1 WHERE key='total_txs'")
+    c.execute("INSERT INTO transactions (sender, receiver, amount, fee, type) VALUES ('MiningPool', ?, ?, 0, 'Point Claim')", (username, tokens_to_claim))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "claimed": tokens_to_claim})
 
 HTML_CONTENT = """<!DOCTYPE html>
 <html>
@@ -245,7 +198,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         async function claimTokens() {
-            let username = document.getElementById('minerName5').value || document.getElementById('minerName').value;
+            let username = document.getElementById('minerName').value;
             if(!username) return alert("Enter your username first!");
             let res = await fetch('/api/claim-tokens', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username})});
             let d = await res.json();
@@ -259,10 +212,6 @@ HTML_CONTENT = """<!DOCTYPE html>
 </html>
 """
 
-# Gunicorn ডেমোন বা WSGI সার্ভারের জন্য app অবজেক্ট তৈরি করা হলো
-app = TokenHandler
-
 if __name__ == "__main__":
-    server = http.server.HTTPServer(("0.0.0.0", PORT), TokenHandler)
-    print(f"Mining Server running at http://0.0.0.0:{PORT}")
-    server.serve_forever()
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
