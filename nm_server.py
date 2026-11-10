@@ -2,6 +2,17 @@ from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.responses import HTMLResponse
 import os
 
+app = FastAPI()
+
+@app.get("/ui", response_class=HTMLResponse)
+async def get_ui():
+    if os.path.exists("index.html"):
+        with open("index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>index.html file not found!</h1>"
+from fastapi.responses import HTMLResponse
+import os
+
 @app.get("/ui", response_class=HTMLResponse)
 async def get_ui():
     if os.path.exists("index.html"):
