@@ -1,1 +1,9 @@
+fastapi
+uvicorn
 gunicorn
+sqlalchemy
+passlib
+bcrypt
+pyjwt
+pyotp
+pydantic
