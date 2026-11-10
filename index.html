@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nm Protocol Super-App v630.0 (Omni-Verse)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #0b0e11; color: #eaecef; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: #181a20; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2b313a; }
+        .logo { font-size: 20px; font-weight: 700; color: #f0b90b; display: flex; align-items: center; gap: 10px; }
+        .container { max-width: 1200px; margin: 30px auto; width: 100%; padding: 0 20px; flex: 1; }
+        .card { background: #181a20; border: 1px solid #2b313a; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        h2 { margin-bottom: 15px; color: #f0b90b; font-size: 22px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .stat-box { background: #21262d; padding: 20px; border-radius: 8px; border: 1px solid #30363d; }
+        .stat-box h4 { color: #8b949e; font-size: 14px; margin-bottom: 8px; }
+        .stat-box p { font-size: 22px; font-weight: 600; color: #58a6ff; }
+        input, select, button { width: 100%; padding: 12px; margin-top: 10px; margin-bottom: 15px; background: #0d1117; border: 1px solid #30363d; color: #eaecef; border-radius: 6px; font-size: 14px; }
+        button { background: #f0b90b; color: #000; font-weight: 600; cursor: pointer; transition: 0.2s; border: none; }
+        button:hover { background: #d9a508; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">⚡ Nm Protocol Super-App v630.0</div>
+        <div id="user-info" class="hidden">
+            <span id="nav-username" style="margin-right: 15px; font-weight: 600;"></span>
+            <button onclick="logout()" style="width: auto; padding: 6px 15px; background: #da3633; color: #fff;">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Auth Section -->
+        <div id="auth-section" class="grid">
+            <div class="card">
+                <h2>🔑 Login to Super-App</h2>
+                <input type="text" id="login-user" placeholder="Username">
+                <input type="password" id="login-pass" placeholder="Password">
+                <input type="text" id="login-totp" placeholder="Google Auth 6-digit TOTP">
+                <button onclick="login()">Login Securely</button>
+            </div>
+            <div class="card">
+                <h2>📝 Register New Account</h2>
+                <input type="text" id="reg-user" placeholder="Choose Username">
+                <input type="email" id="reg-email" placeholder="Email Address">
+                <input type="password" id="reg-pass" placeholder="Choose Password">
+                <button onclick="register()">Register & Get Secret</button>
+                <div id="reg-result" style="font-size: 13px; color: #f0b90b; margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="hidden">
+            <div class="card">
+                <h2>📊 Omni-Verse Super-App Portfolio</h2>
+                <div class="grid">
+                    <div class="stat-box">
+                        <h4>USDT Balance</h4>
+                        <p id="val-usdt">0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>NSDT (Nizam Stable)</h4>
+                        <p id="val-nsdt" style="color: #3fb950;">0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Nm Protocol Token (NM)</h4>
+                        <p id="val-nm">0.00</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Web3 Wallet</h4>
+                        <p id="val-wallet" style="font-size: 14px; color: #f0b90b;">Not Connected</p>
+                    </div>
+                </div>
+                <button onclick="connectMetamask()" style="margin-top: 15px; background: #f6851b; color: #fff; width: 220px;">Connect MetaMask / Web3</button>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h2>🌉 Advanced Cross-Chain Super-Swap</h2>
+                    <label>From Asset</label>
+                    <select id="swap-from">
+                        <option value="USDT">USDT</option>
+                        <option value="NSDT">NSDT (Nizam Stable)</option>
+                        <option value="NM">NM Token</option>
+                    </select>
+                    <label>To Asset</label>
+                    <select id="swap-to">
+                        <option value="NSDT">NSDT (Nizam Stable)</option>
+                        <option value="NM">NM Token</option>
+                        <option value="USDT">USDT</option>
+                    </select>
+                    <label>Target Bridge Network</label>
+                    <select id="swap-chain">
+                        <option value="Ethereum/Polygon">Ethereum / Polygon ZK-Rollup</option>
+                        <option value="BNB Chain">BNB Smart Chain (BSC)</option>
+                    </select>
+                    <label>Amount</label>
+                    <input type="number" id="swap-amount" placeholder="0.00">
+                    <button onclick="executeSuperSwap()">Execute Super-Swap</button>
+                </div>
+
+                <div class="card">
+                    <h2>👥 Referral & Affiliate Program</h2>
+                    <p style="color: #8b949e; font-size: 14px; margin-bottom: 10px;">Share your referral code and earn instant NSDT commissions!</p>
+                    <div class="stat-box" style="margin-bottom: 15px;">
+                        <h4>Your Referral Code</h4>
+                        <p id="val-refcode" style="color: #f0b90b;">NM-NIZAM-99</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Referral Earnings</h4>
+                        <p id="val-refearn">0.00 NSDT</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🖼️ NFT Marketplace & Minting</h2>
+                <div id="nft-box" class="grid">Loading NFTs...</div>
+            </div>
+
+            <div class="card">
+                <h2>🔗 Post-Quantum SHA-3 Ledger View</h2>
+                <button onclick="loadQuantumChain()" style="width: 220px; margin-bottom: 15px;">Refresh Quantum Chain</button>
+                <div id="chain-box" style="background: #0d1117; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 13px; max-height: 250px; overflow-y: auto;">
+                    Click refresh to view quantum blocks...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem("nm_token") || "";
+
+        if (token) {
+            showDashboard();
+        }
+
+        async function register() {
+            let u = document.getElementById("reg-user").value;
+            let e = document.getElementById("reg-email").value;
+            let p = document.getElementById("reg-pass").value;
+            let res = await fetch("/register", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username: u, email: e, password: p})
+            });
+            let data = await res.json();
+            if (res.ok) {
+                document.getElementById("reg-result").innerText = data.message;
+            } else {
+                alert(data.detail);
+            }
+        }
+
+        async function login() {
+            let u = document.getElementById("login-user").value;
+            let p = document.getElementById("login-pass").value;
+            let t = document.getElementById("login-totp").value;
+            let res = await fetch("/login", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username: u, password: p, totp_code: t})
+            });
+            let data = await res.json();
+            if (res.ok) {
+                token = data.access_token;
+                localStorage.setItem("nm_token", token);
+                showDashboard();
+            } else {
+                alert(data.detail);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("nm_token");
+            token = "";
+            document.getElementById("auth-section").classList.remove("hidden");
+            document.getElementById("dashboard-section").classList.add("hidden");
+            document.getElementById("user-info").classList.add("hidden");
+        }
+
+        async function showDashboard() {
+            document.getElementById("auth-section").classList.add("hidden");
+            document.getElementById("dashboard-section").classList.remove("hidden");
+            document.getElementById("user-info").classList.remove("hidden");
+            loadWalletData();
+            loadNftMarket();
+            loadQuantumChain();
+        }
+
+        async function loadWalletData() {
+            let res = await fetch("/wallet/balance", {
+                headers: {"Authorization": `Bearer ${token}`}
+            });
+            if (res.ok) {
+                let data = await res.json();
+                document.getElementById("nav-username").innerText = `@${data.username}`;
+                document.getElementById("val-usdt").innerText = data.usdt.toLocaleString() + " USDT";
+                document.getElementById("val-nsdt").innerText = data.nsdt.toLocaleString() + " NSDT";
+                document.getElementById("val-nm").innerText = data.nm.toLocaleString() + " NM";
+                document.getElementById("val-wallet").innerText = data.wallet;
+                document.getElementById("val-refcode").innerText = data.referral_code;
+                document.getElementById("val-refearn").innerText = data.referral_earnings.toLocaleString() + " NSDT";
+            }
+        }
+
+        async function connectMetamask() {
+            if (window.ethereum) {
+                try {
+                    let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    let walletAddr = accounts[0];
+                    let res = await fetch("/wallet/connect-metamask", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+                        body: JSON.stringify({wallet_address: walletAddr})
+                    });
+                    let data = await res.json();
+                    if (res.ok) {
+                        alert(data.message);
+                        loadWalletData();
+                    }
+                } catch (err) {
+                    alert("Wallet connection failed!");
+                }
+            } else {
+                // Simulation for mobile / non-extension environments
+                let mockWallet = "0x71C...39F2";
+                let res = await fetch("/wallet/connect-metamask", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+                    body: JSON.stringify({wallet_address: mockWallet})
+                });
+                let data = await res.json();
+                alert(data.message);
+                loadWalletData();
+            }
+        }
+
+        async function executeSuperSwap() {
+            let from = document.getElementById("swap-from").value;
+            let to = document.getElementById("swap-to").value;
+            let chain = document.getElementById("swap-chain").value;
+            let amt = parseFloat(document.getElementById("swap-amount").value);
+            
+            let res = await fetch("/dex/advanced-swap", {
+                method: "POST",
+                headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+                body: JSON.stringify({from_asset: from, to_asset: to, amount: amt, target_chain: chain})
+            });
+            let data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                loadWalletData();
+                loadQuantumChain();
+            } else {
+                alert(data.detail);
+            }
+        }
+
+        async function loadNftMarket() {
+            let res = await fetch("/nft/market", {
+                headers: {"Authorization": `Bearer ${token}`}
+            });
+            if (res.ok) {
+                let data = await res.json();
+                let box = document.getElementById("nft-box");
+                box.innerHTML = "";
+                data.nfts.forEach(nft => {
+                    box.innerHTML += `<div class="stat-box">
+                        <h4>${nft.name}</h4>
+                        <p style="color: #f0b90b; font-size: 18px; margin: 8px 0;">${nft.price} NSDT</p>
+                        <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Owner: @${nft.owner}</p>
+                        <button onclick="buyNft(${nft.id})" style="padding: 8px; font-size: 13px;">Buy NFT</button>
+                    </div>`;
+                });
+            }
+        }
+
+        async function buyNft(nftId) {
+            let res = await fetch("/nft/buy", {
+                method: "POST",
+                headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
+                body: JSON.stringify({nft_id: nftId})
+            });
+            let data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                loadWalletData();
+                loadNftMarket();
+            } else {
+                alert(data.detail);
+            }
+        }
+
+        async function loadQuantumChain() {
+            let res = await fetch("/chain/quantum-ledger");
+            if (res.ok) {
+                let data = await res.json();
+                let box = document.getElementById("chain-box");
+                box.innerHTML = `<p style="color: #3fb950; margin-bottom: 8px;">Quantum Valid: ${data.valid} | Total Blocks: ${data.length}</p>`;
+                data.chain.forEach(b => {
+                    box.innerHTML += `<div style="border-top: 1px solid #30363d; padding-top: 6px; margin-top: 6px;">
+                        <b>Block #${b.index}</b> [SHA-3 Hash: ${b.hash.substring(0, 16)}...]<br>
+                        <span style="color: #8b949e;">Data: ${JSON.stringify(b.transactions)}</span>
+                    </div>`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
