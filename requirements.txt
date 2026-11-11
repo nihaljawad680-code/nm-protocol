@@ -1,9 +1,8 @@
 fastapi
 uvicorn
-gunicorn
 sqlalchemy
-passlib
-bcrypt
-pyjwt
 pyotp
+pyjwt
+passlib[bcrypt]
+bcrypt
 pydantic
