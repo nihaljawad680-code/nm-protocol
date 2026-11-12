@@ -1,315 +1,253 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn" id="htmlRoot">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nm Protocol Super-App v630.0 (Omni-Verse)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: #0b0e11; color: #eaecef; min-height: 100vh; display: flex; flex-direction: column; }
-        header { background: #181a20; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2b313a; }
-        .logo { font-size: 20px; font-weight: 700; color: #f0b90b; display: flex; align-items: center; gap: 10px; }
-        .container { max-width: 1200px; margin: 30px auto; width: 100%; padding: 0 20px; flex: 1; }
-        .card { background: #181a20; border: 1px solid #2b313a; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        h2 { margin-bottom: 15px; color: #f0b90b; font-size: 22px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .stat-box { background: #21262d; padding: 20px; border-radius: 8px; border: 1px solid #30363d; }
-        .stat-box h4 { color: #8b949e; font-size: 14px; margin-bottom: 8px; }
-        .stat-box p { font-size: 22px; font-weight: 600; color: #58a6ff; }
-        input, select, button { width: 100%; padding: 12px; margin-top: 10px; margin-bottom: 15px; background: #0d1117; border: 1px solid #30363d; color: #eaecef; border-radius: 6px; font-size: 14px; }
-        button { background: #f0b90b; color: #000; font-weight: 600; cursor: pointer; transition: 0.2s; border: none; }
-        button:hover { background: #d9a508; }
-        .hidden { display: none !important; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nm Protocol - Enterprise Exchange</title>
+  <style>
+    :root {
+      --bg-color: #0b0e11; --card-bg: #1e2329; --accent-color: #fcd535;
+      --text-color: #eaecef; --text-dim: #848e9c; --border-color: #474d57;
+      --success-color: #0ecb81; --error-color: #f6465d;
+    }
+    .light-theme {
+      --bg-color: #f8f9fa; --card-bg: #ffffff; --accent-color: #0052ff;
+      --text-color: #1a1a1a; --text-dim: #6c757d; --border-color: #ced4da;
+    }
+    body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; display: flex; justify-content: center; transition: 0.3s; }
+    .container { width: 100%; max-width: 680px; background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid var(--border-color); }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .controls-group { display: flex; gap: 6px; }
+    .control-btn { background: var(--border-color); border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; color: var(--text-color); font-size: 11px; font-weight: bold; }
+    h2 { color: var(--accent-color); margin: 0; font-size: 20px; }
+    .badge { font-size: 10px; background: rgba(14,203,129,0.15); color: var(--success-color); padding: 3px 7px; border-radius: 4px; border: 1px solid var(--success-color); }
+    .tabs { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 18px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
+    .tab-btn { flex: none; background: transparent; border: none; color: var(--text-dim); padding: 8px 10px; font-weight: bold; cursor: pointer; border-bottom: 2px solid transparent; font-size: 11px; }
+    .tab-btn.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+    .form-group { margin-bottom: 11px; }
+    label { display: block; margin-bottom: 4px; font-size: 12px; color: var(--text-dim); }
+    input, select, textarea { width: 100%; padding: 9px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); box-sizing: border-box; font-size: 13px; }
+    button.submit-btn { width: 100%; padding: 11px; background: var(--accent-color); border: none; border-radius: 6px; color: #000; font-weight: bold; cursor: pointer; margin-top: 6px; font-size: 13px; }
+    button.submit-btn:hover { opacity: 0.9; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .response-box { margin-top: 14px; padding: 10px; border-radius: 6px; font-size: 12px; word-break: break-all; display: none; }
+    .response-box.success { background: rgba(14,203,129,0.15); border: 1px solid var(--success-color); color: var(--success-color); display: block; }
+    .response-box.error { background: rgba(246,70,93,0.15); border: 1px solid var(--error-color); color: var(--error-color); display: block; }
+    .wallet-box { background: var(--bg-color); padding: 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px; font-size: 13px; line-height: 1.6; }
+    .ticker-box { background: var(--bg-color); padding: 9px; border-radius: 6px; text-align: center; font-size: 13px; font-weight: bold; color: var(--success-color); margin-bottom: 14px; border: 1px solid var(--border-color); }
+    .item-card { background: var(--bg-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 11px; border-left: 3px solid var(--accent-color); border: 1px solid var(--border-color); }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">⚡ Nm Protocol Super-App v630.0</div>
-        <div id="user-info" class="hidden">
-            <span id="nav-username" style="margin-right: 15px; font-weight: 600;"></span>
-            <button onclick="logout()" style="width: auto; padding: 6px 15px; background: #da3633; color: #fff;">Logout</button>
-        </div>
-    </header>
-
-    <div class="container">
-        <!-- Auth Section -->
-        <div id="auth-section" class="grid">
-            <div class="card">
-                <h2>🔑 Login to Super-App</h2>
-                <input type="text" id="login-user" placeholder="Username">
-                <input type="password" id="login-pass" placeholder="Password">
-                <input type="text" id="login-totp" placeholder="Google Auth 6-digit TOTP">
-                <button onclick="login()">Login Securely</button>
-            </div>
-            <div class="card">
-                <h2>📝 Register New Account</h2>
-                <input type="text" id="reg-user" placeholder="Choose Username">
-                <input type="email" id="reg-email" placeholder="Email Address">
-                <input type="password" id="reg-pass" placeholder="Choose Password">
-                <button onclick="register()">Register & Get Secret</button>
-                <div id="reg-result" style="font-size: 13px; color: #f0b90b; margin-top: 10px;"></div>
-            </div>
-        </div>
-
-        <!-- Dashboard Section -->
-        <div id="dashboard-section" class="hidden">
-            <div class="card">
-                <h2>📊 Omni-Verse Super-App Portfolio</h2>
-                <div class="grid">
-                    <div class="stat-box">
-                        <h4>USDT Balance</h4>
-                        <p id="val-usdt">0.00</p>
-                    </div>
-                    <div class="stat-box">
-                        <h4>NSDT (Nizam Stable)</h4>
-                        <p id="val-nsdt" style="color: #3fb950;">0.00</p>
-                    </div>
-                    <div class="stat-box">
-                        <h4>Nm Protocol Token (NM)</h4>
-                        <p id="val-nm">0.00</p>
-                    </div>
-                    <div class="stat-box">
-                        <h4>Web3 Wallet</h4>
-                        <p id="val-wallet" style="font-size: 14px; color: #f0b90b;">Not Connected</p>
-                    </div>
-                </div>
-                <button onclick="connectMetamask()" style="margin-top: 15px; background: #f6851b; color: #fff; width: 220px;">Connect MetaMask / Web3</button>
-            </div>
-
-            <div class="grid">
-                <div class="card">
-                    <h2>🌉 Advanced Cross-Chain Super-Swap</h2>
-                    <label>From Asset</label>
-                    <select id="swap-from">
-                        <option value="USDT">USDT</option>
-                        <option value="NSDT">NSDT (Nizam Stable)</option>
-                        <option value="NM">NM Token</option>
-                    </select>
-                    <label>To Asset</label>
-                    <select id="swap-to">
-                        <option value="NSDT">NSDT (Nizam Stable)</option>
-                        <option value="NM">NM Token</option>
-                        <option value="USDT">USDT</option>
-                    </select>
-                    <label>Target Bridge Network</label>
-                    <select id="swap-chain">
-                        <option value="Ethereum/Polygon">Ethereum / Polygon ZK-Rollup</option>
-                        <option value="BNB Chain">BNB Smart Chain (BSC)</option>
-                    </select>
-                    <label>Amount</label>
-                    <input type="number" id="swap-amount" placeholder="0.00">
-                    <button onclick="executeSuperSwap()">Execute Super-Swap</button>
-                </div>
-
-                <div class="card">
-                    <h2>👥 Referral & Affiliate Program</h2>
-                    <p style="color: #8b949e; font-size: 14px; margin-bottom: 10px;">Share your referral code and earn instant NSDT commissions!</p>
-                    <div class="stat-box" style="margin-bottom: 15px;">
-                        <h4>Your Referral Code</h4>
-                        <p id="val-refcode" style="color: #f0b90b;">NM-NIZAM-99</p>
-                    </div>
-                    <div class="stat-box">
-                        <h4>Referral Earnings</h4>
-                        <p id="val-refearn">0.00 NSDT</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>🖼️ NFT Marketplace & Minting</h2>
-                <div id="nft-box" class="grid">Loading NFTs...</div>
-            </div>
-
-            <div class="card">
-                <h2>🔗 Post-Quantum SHA-3 Ledger View</h2>
-                <button onclick="loadQuantumChain()" style="width: 220px; margin-bottom: 15px;">Refresh Quantum Chain</button>
-                <div id="chain-box" style="background: #0d1117; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 13px; max-height: 250px; overflow-y: auto;">
-                    Click refresh to view quantum blocks...
-                </div>
-            </div>
-        </div>
+<div class="container">
+  <div class="top-bar">
+    <div>
+      <h2>Nm Protocol</h2>
+      <span class="badge">⚡ Enterprise Edition</span>
     </div>
+    <div class="controls-group">
+      <button class="control-btn" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+      <button class="control-btn" onclick="toggleLanguage()" id="langBtn">English</button>
+    </div>
+  </div>
 
-    <script>
-        let token = localStorage.getItem("nm_token") || "";
+  <div class="ticker-box" id="liveTicker">Live Price: Connecting...</div>
 
-        if (token) {
-            showDashboard();
-        }
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('register')">রেজিস্টার</button>
+    <button class="tab-btn" onclick="switchTab('login')">লগইন</button>
+    <button class="tab-btn" onclick="switchTab('wallet')">ওয়ালেট ও ফিয়াট</button>
+    <button class="tab-btn" onclick="switchTab('spot')">স্পট ট্রেড</button>
+    <button class="tab-btn" onclick="switchTab('p2p')">P2P এসক্রো</button>
+    <button class="tab-btn" onclick="switchTab('support')">সাপোর্ট</button>
+    <button class="tab-btn" onclick="switchTab('history')">হিস্ট্রি</button>
+  </div>
 
-        async function register() {
-            let u = document.getElementById("reg-user").value;
-            let e = document.getElementById("reg-email").value;
-            let p = document.getElementById("reg-pass").value;
-            let res = await fetch("/register", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username: u, email: e, password: p})
-            });
-            let data = await res.json();
-            if (res.ok) {
-                document.getElementById("reg-result").innerText = data.message;
-            } else {
-                alert(data.detail);
-            }
-        }
+  <!-- Register -->
+  <div id="register" class="tab-content active">
+    <form onsubmit="handleFormSubmit(event, '/api/register')">
+      <div class="form-group"><label>ইউজারনেম</label><input type="text" name="username" required></div>
+      <div class="form-group"><label>ইমেল (OTP)</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>পাসওয়ার্ড</label><input type="password" name="password" required></div>
+      <button type="submit" class="submit-btn">একাউন্ট তৈরি করুন</button>
+    </form>
+  </div>
 
-        async function login() {
-            let u = document.getElementById("login-user").value;
-            let p = document.getElementById("login-pass").value;
-            let t = document.getElementById("login-totp").value;
-            let res = await fetch("/login", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username: u, password: p, totp_code: t})
-            });
-            let data = await res.json();
-            if (res.ok) {
-                token = data.access_token;
-                localStorage.setItem("nm_token", token);
-                showDashboard();
-            } else {
-                alert(data.detail);
-            }
-        }
+  <!-- Login -->
+  <div id="login" class="tab-content">
+    <form onsubmit="handleLoginSubmit(event)">
+      <div class="form-group"><label>ইউজারনেম</label><input type="text" name="username" required></div>
+      <div class="form-group"><label>পাসওয়ার্ড</label><input type="password" name="password" required></div>
+      <button type="submit" class="submit-btn">লগইন করুন</button>
+    </form>
+  </div>
 
-        function logout() {
-            localStorage.removeItem("nm_token");
-            token = "";
-            document.getElementById("auth-section").classList.remove("hidden");
-            document.getElementById("dashboard-section").classList.add("hidden");
-            document.getElementById("user-info").classList.add("hidden");
-        }
+  <!-- Wallet & Fiat -->
+  <div id="wallet" class="tab-content">
+    <div class="wallet-box" id="walletInfo">লগইন করার পর ওয়ালেট ডেটা দেখা যাবে।</div>
+    <h4 style="margin:0 0 6px; color:var(--accent-color);">💳 ফিয়াট ডিপোজিট (bKash / ব্যাংক)</h4>
+    <form onsubmit="handleFiatDeposit(event)" style="margin-bottom: 14px;">
+      <div class="form-group"><label>পেমেন্ট মেথড</label><select name="payment_method"><option value="bKash">bKash</option><option value="Nagad">Nagad</option><option value="Bank">Bank Transfer</option></select></div>
+      <div class="form-group"><label>টাকার পরিমাণ (BDT)</label><input type="number" step="any" name="amount" required></div>
+      <button type="submit" class="submit-btn" style="background:#8c9eff;">ফিয়াট ডিপোজিট করুন</button>
+    </form>
+    <h4 style="margin:0 0 6px; color:var(--accent-color);">🛡️ KYC ভেরিফিকেশন</h4>
+    <form onsubmit="handleKYCSubmit(event)">
+      <div class="form-group">
+        <label>পূর্ণ নাম</label><input type="text" name="full_name" placeholder="Full Name" required style="margin-bottom:6px;">
+        <label>আইডি টাইপ</label><select name="id_type" style="margin-bottom:6px;"><option value="NID">NID</option><option value="Passport">Passport</option></select>
+        <label>আইডি নম্বর</label><input type="text" name="id_number" placeholder="ID Number" required>
+      </div>
+      <button type="submit" class="submit-btn" style="background:var(--success-color); color:#fff;">KYC ভেরিফাই করুন</button>
+    </form>
+  </div>
 
-        async function showDashboard() {
-            document.getElementById("auth-section").classList.add("hidden");
-            document.getElementById("dashboard-section").classList.remove("hidden");
-            document.getElementById("user-info").classList.remove("hidden");
-            loadWalletData();
-            loadNftMarket();
-            loadQuantumChain();
-        }
+  <!-- Spot Trading -->
+  <div id="spot" class="tab-content">
+    <form onsubmit="handleProtectedAction(event, '/api/order')">
+      <div class="form-group"><label>অর্ডার টাইপ</label><select name="order_type"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div>
+      <div class="form-group"><label>প্রাইস (nsdt)</label><input type="number" step="any" name="price" required></div>
+      <div class="form-group"><label>পরিমাণ (Nm)</label><input type="number" step="any" name="amount" required></div>
+      <button type="submit" class="submit-btn">স্পট অর্ডার প্লেস করুন</button>
+    </form>
+  </div>
 
-        async function loadWalletData() {
-            let res = await fetch("/wallet/balance", {
-                headers: {"Authorization": `Bearer ${token}`}
-            });
-            if (res.ok) {
-                let data = await res.json();
-                document.getElementById("nav-username").innerText = `@${data.username}`;
-                document.getElementById("val-usdt").innerText = data.usdt.toLocaleString() + " USDT";
-                document.getElementById("val-nsdt").innerText = data.nsdt.toLocaleString() + " NSDT";
-                document.getElementById("val-nm").innerText = data.nm.toLocaleString() + " NM";
-                document.getElementById("val-wallet").innerText = data.wallet;
-                document.getElementById("val-refcode").innerText = data.referral_code;
-                document.getElementById("val-refearn").innerText = data.referral_earnings.toLocaleString() + " NSDT";
-            }
-        }
+  <!-- P2P Escrow -->
+  <div id="p2p" class="tab-content">
+    <form onsubmit="handleProtectedAction(event, '/api/p2p/ad')" style="margin-bottom: 12px;">
+      <div class="form-group"><label>অ্যাড টাইপ</label><select name="ad_type"><option value="SELL">SELL (Escrow Lock)</option><option value="BUY">BUY</option></select></div>
+      <div class="form-group"><label>অ্যাসেট</label><select name="asset"><option value="Nm">Nm</option></select></div>
+      <div class="form-group"><label>প্রাইস</label><input type="number" step="any" name="price" required></div>
+      <div class="form-group"><label>পরিমাণ</label><input type="number" step="any" name="amount" required></div>
+      <div class="form-group"><label>পেমেন্ট মেথড</label><input type="text" name="payment_method" value="bKash" required></div>
+      <button type="submit" class="submit-btn">P2P অ্যাড পোস্ট করুন</button>
+    </form>
+    <button class="submit-btn" style="background:var(--success-color); color:#fff; margin-bottom:8px;" onclick="loadP2PAds()">অ্যাডস্ রিফ্রেশ করুন</button>
+    <div id="p2pAdsList"></div>
+  </div>
 
-        async function connectMetamask() {
-            if (window.ethereum) {
-                try {
-                    let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    let walletAddr = accounts[0];
-                    let res = await fetch("/wallet/connect-metamask", {
-                        method: "POST",
-                        headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
-                        body: JSON.stringify({wallet_address: walletAddr})
-                    });
-                    let data = await res.json();
-                    if (res.ok) {
-                        alert(data.message);
-                        loadWalletData();
-                    }
-                } catch (err) {
-                    alert("Wallet connection failed!");
-                }
-            } else {
-                // Simulation for mobile / non-extension environments
-                let mockWallet = "0x71C...39F2";
-                let res = await fetch("/wallet/connect-metamask", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
-                    body: JSON.stringify({wallet_address: mockWallet})
-                });
-                let data = await res.json();
-                alert(data.message);
-                loadWalletData();
-            }
-        }
+  <!-- Support -->
+  <div id="support" class="tab-content">
+    <h4 style="color:var(--accent-color); margin-top:0;">💬 ২৪/৭ কাস্টমার সাপোর্ট</h4>
+    <form onsubmit="handleSupportTicket(event)" style="margin-bottom:12px;">
+      <div class="form-group"><label>বিষয়</label><input type="text" name="subject" required></div>
+      <div class="form-group"><label>বিবরণ</label><textarea name="message" rows="3" required></textarea></div>
+      <button type="submit" class="submit-btn">টিকিট সাবমিট করুন</button>
+    </form>
+    <button class="submit-btn" style="background:#0ecb81; color:#fff;" onclick="loadTickets()">আমার টিকিটসমূহ</button>
+    <div id="ticketsList" style="margin-top:10px;"></div>
+  </div>
 
-        async function executeSuperSwap() {
-            let from = document.getElementById("swap-from").value;
-            let to = document.getElementById("swap-to").value;
-            let chain = document.getElementById("swap-chain").value;
-            let amt = parseFloat(document.getElementById("swap-amount").value);
-            
-            let res = await fetch("/dex/advanced-swap", {
-                method: "POST",
-                headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
-                body: JSON.stringify({from_asset: from, to_asset: to, amount: amt, target_chain: chain})
-            });
-            let data = await res.json();
-            if (res.ok) {
-                alert(data.message);
-                loadWalletData();
-                loadQuantumChain();
-            } else {
-                alert(data.detail);
-            }
-        }
+  <!-- History -->
+  <div id="history" class="tab-content">
+    <button class="submit-btn" style="margin-bottom:10px;" onclick="loadTransactions()">হিস্ট্রি রিফ্রেশ করুন</button>
+    <div id="txHistoryList"></div>
+  </div>
 
-        async function loadNftMarket() {
-            let res = await fetch("/nft/market", {
-                headers: {"Authorization": `Bearer ${token}`}
-            });
-            if (res.ok) {
-                let data = await res.json();
-                let box = document.getElementById("nft-box");
-                box.innerHTML = "";
-                data.nfts.forEach(nft => {
-                    box.innerHTML += `<div class="stat-box">
-                        <h4>${nft.name}</h4>
-                        <p style="color: #f0b90b; font-size: 18px; margin: 8px 0;">${nft.price} NSDT</p>
-                        <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Owner: @${nft.owner}</p>
-                        <button onclick="buyNft(${nft.id})" style="padding: 8px; font-size: 13px;">Buy NFT</button>
-                    </div>`;
-                });
-            }
-        }
+  <div id="responseBox" class="response-box"></div>
+</div>
 
-        async function buyNft(nftId) {
-            let res = await fetch("/nft/buy", {
-                method: "POST",
-                headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
-                body: JSON.stringify({nft_id: nftId})
-            });
-            let data = await res.json();
-            if (res.ok) {
-                alert(data.message);
-                loadWalletData();
-                loadNftMarket();
-            } else {
-                alert(data.detail);
-            }
-        }
+<script>
+  let jwtToken = localStorage.getItem('token') || '';
+  let currentLang = 'bn';
 
-        async function loadQuantumChain() {
-            let res = await fetch("/chain/quantum-ledger");
-            if (res.ok) {
-                let data = await res.json();
-                let box = document.getElementById("chain-box");
-                box.innerHTML = `<p style="color: #3fb950; margin-bottom: 8px;">Quantum Valid: ${data.valid} | Total Blocks: ${data.length}</p>`;
-                data.chain.forEach(b => {
-                    box.innerHTML += `<div style="border-top: 1px solid #30363d; padding-top: 6px; margin-top: 6px;">
-                        <b>Block #${b.index}</b> [SHA-3 Hash: ${b.hash.substring(0, 16)}...]<br>
-                        <span style="color: #8b949e;">Data: ${JSON.stringify(b.transactions)}</span>
-                    </div>`;
-                });
-            }
-        }
-    </script>
+  function toggleTheme() {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    document.getElementById('themeBtn').innerText = isLight ? '🌙 Dark' : '☀️ Light';
+  }
+
+  function toggleLanguage() {
+    currentLang = currentLang === 'bn' ? 'en' : 'bn';
+    document.getElementById('langBtn').innerText = currentLang === 'bn' ? 'English' : 'বাংলা';
+  }
+
+  function connectWebSocket() {
+    const ws = new WebSocket((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/ticker');
+    ws.onmessage = e => { const d = JSON.parse(e.data); document.getElementById('liveTicker').innerText = `${d.symbol} : $${d.price} (${d.time})`; };
+    ws.onclose = () => setTimeout(connectWebSocket, 3000);
+  }
+  connectWebSocket();
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+    document.getElementById('responseBox').className = 'response-box';
+    if (tabId === 'wallet') loadWallet();
+    if (tabId === 'p2p') loadP2PAds();
+    if (tabId === 'history') loadTransactions();
+    if (tabId === 'support') loadTickets();
+  }
+
+  async function handleFormSubmit(e, ep) { e.preventDefault(); sendRequest(ep, 'POST', Object.fromEntries(new FormData(e.target).entries())); }
+  async function handleLoginSubmit(e) {
+    e.preventDefault();
+    const res = await sendRequest('/api/login', 'POST', Object.fromEntries(new FormData(e.target).entries()));
+    if (res && res.access_token) { jwtToken = res.access_token; localStorage.setItem('token', jwtToken); switchTab('wallet'); }
+  }
+  async function handleKYCSubmit(e) { e.preventDefault(); if(!jwtToken) return; await sendRequest('/api/kyc/verify', 'POST', Object.fromEntries(new FormData(e.target).entries()), {'Authorization': `Bearer ${jwtToken}`}); loadWallet(); }
+  async function handleFiatDeposit(e) { e.preventDefault(); if(!jwtToken) return; const d = Object.fromEntries(new FormData(e.target).entries()); d.amount = parseFloat(d.amount); d.currency = 'BDT'; await sendRequest('/api/fiat/deposit', 'POST', d, {'Authorization': `Bearer ${jwtToken}`}); loadWallet(); }
+  async function handleSupportTicket(e) { e.preventDefault(); if(!jwtToken) return; await sendRequest('/api/support/ticket', 'POST', Object.fromEntries(new FormData(e.target).entries()), {'Authorization': `Bearer ${jwtToken}`}); loadTickets(); }
+  
+  async function handleProtectedAction(e, ep) {
+    e.preventDefault(); if(!jwtToken) { showResponse('প্রথমে লগইন করুন!', false); return; }
+    const d = Object.fromEntries(new FormData(e.target).entries());
+    if(d.amount) d.amount = parseFloat(d.amount); if(d.price) d.price = parseFloat(d.price);
+    await sendRequest(ep, 'POST', d, {'Authorization': `Bearer ${jwtToken}`});
+    if(ep.includes('p2p')) { loadWallet(); loadP2PAds(); }
+  }
+
+  async function sendRequest(ep, meth, body, headers={}) {
+    const box = document.getElementById('responseBox'); box.className = 'response-box'; box.innerText = 'Processing...';
+    try {
+      const res = await fetch(ep, {method: meth, headers: {'Content-Type': 'application/json', ...headers}, body: JSON.stringify(body)});
+      const r = await res.json();
+      if(res.ok) { showResponse(r.message || 'Success!', true); return r; }
+      else { showResponse(r.detail || 'Failed!', false); }
+    } catch(err) { showResponse('Connection Error!', false); }
+  }
+
+  function showResponse(msg, success) {
+    const box = document.getElementById('responseBox'); box.className = `response-box ${success ? 'success' : 'error'}`; box.innerText = msg;
+  }
+
+  async function loadWallet() {
+    if(!jwtToken) return;
+    const res = await fetch('/api/wallet', {headers: {'Authorization': `Bearer ${jwtToken}`}});
+    const w = await res.json();
+    if(res.ok) {
+      document.getElementById('walletInfo').innerHTML = `👤 <b>User:</b> ${w.username}<br>💎 <b>Nm:</b> ${w.nm_balance.toFixed(4)} | 💵 <b>nsdt:</b> ${w.nsdt_balance.toFixed(4)}<br>💳 <b>BDT Fiat:</b> ৳${w.fiat_bdt_balance.toFixed(2)}<br>🛡️ <b>KYC:</b> ${w.kyc_status} | 📊 <b>AML Risk:</b> ${w.aml_risk_score}`;
+    }
+  }
+
+  async function loadP2PAds() {
+    const ads = await (await fetch('/api/p2p/ads')).json();
+    const list = document.getElementById('p2pAdsList'); list.innerHTML = '<h4>P2P Ads:</h4>';
+    if(!ads.length) { list.innerHTML += '<p style="font-size:11px;color:var(--text-dim);">No ads found.</p>'; return; }
+    ads.forEach(a => { list.innerHTML += `<div class="item-card"><b>Seller:</b> ${a.seller} | <b>Type:</b> ${a.type} | <b>Amt:</b> ${a.amount} ${a.asset} | <b>Price:</b> ${a.price} | <b>Pay:</b> ${a.method}</div>`; });
+  }
+
+  async function loadTickets() {
+    if(!jwtToken) return;
+    const tickets = await (await fetch('/api/support/tickets', {headers: {'Authorization': `Bearer ${jwtToken}`}})).json();
+    const list = document.getElementById('ticketsList'); list.innerHTML = '<h4>Active Tickets:</h4>';
+    if(!tickets.length) { list.innerHTML += '<p style="font-size:11px;color:var(--text-dim);">No support tickets.</p>'; return; }
+    tickets.forEach(t => { list.innerHTML += `<div class="item-card"><b>Sub:</b> ${t.subject} | <b>Msg:</b> ${t.message}<br><b>Priority:</b> ${t.priority} | <b>Status:</b> ${t.status} | ${t.time}</div>`; });
+  }
+
+  async function loadTransactions() {
+    if(!jwtToken) return;
+    const res = await fetch('/api/transactions', {headers: {'Authorization': `Bearer ${jwtToken}`}});
+    const txs = await res.json();
+    const list = document.getElementById('txHistoryList'); list.innerHTML = '<h4>History:</h4>';
+    if(!txs.length) { list.innerHTML += '<p style="font-size:11px;color:var(--text-dim);">No history.</p>'; return; }
+    txs.forEach(t => { list.innerHTML += `<div class="item-card"><span><b>${t.type}</b> (${t.asset})</span><span>Amt: ${t.amount} | ${t.time}</span></div>`; });
+  }
+</script>
+
 </body>
 </html>
